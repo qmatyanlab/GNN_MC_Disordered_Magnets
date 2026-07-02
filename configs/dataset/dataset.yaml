@@ -1,0 +1,43 @@
+_target_: dataset.dataset.CrystalGraphDataModule
+
+graph:
+  backend: ase  # ase | pymatgen | torch_pbc
+  device: cpu
+
+  node_features:
+    elemental_feature_type: one_hot
+    PH_features: true
+
+  edge_features:
+    r_cutoff: 4
+    num_radial_basis: 128
+
+    displacement_vector: true
+
+  properties:
+    graph: [energy, energy_per_atom, magnetization_anisotropy_per_magnetic_atom]
+    node: [initial_MAGMOM, final_MAGMOM]
+#  targets: [energy, magnetic_anisotropy_energy, up_dos_efermi, dw_dos_efermi]
+
+dataset:
+  dataset_root: ${project_root}/data/GNN/
+  dataset_filename: FeCoC_spin_polarized_scf
+
+  normalization_cfg:
+    energy:
+      reduce: min_max
+      axis: all
+
+    magnetization_anisotropy_per_magnetic_atom:
+      reduce: min_max
+      axis: all
+
+  max_samples: 8
+
+  train_ratio: 0.5
+  val_ratio: 0.25
+
+  batch_size:
+    train: 4
+    val: 1
+    test: 1

@@ -1,0 +1,15 @@
+project_root: ${oc.env:PROJECT_ROOT}
+
+defaults:
+  - model: model
+  - train: train
+  - logging: wandb
+  - dataset: dataset
+  - mlip: mlip
+  - mc: mc
+
+hydra:
+  run:
+    dir: logs_and_ckpts/hydra/${now:%Y-%m-%d_%H-%M-%S}
+  sweep:
+    dir: logs_and_ckpts/hydra/multirun/${now:%Y-%m-%d_%H-%M-%S}

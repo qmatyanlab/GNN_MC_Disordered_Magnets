@@ -1,0 +1,22 @@
+_target_: model.GNN.GNN.GNN
+
+defaults:
+   - backbone: Transformer
+
+initialization: xavier_uniform
+
+targets:
+  energy:
+    level: graph
+    length: 1
+    loss_ratio: 1.0
+
+  magnetization_anisotropy_per_magnetic_atom:
+    level: graph
+    length: 1
+    loss_ratio: 1.0
+
+  final_MAGMOM:
+    level: node
+    length: 1
+    loss_ratio: 1.0

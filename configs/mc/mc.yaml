@@ -1,0 +1,125 @@
+seed: 42
+name: test_run
+
+# ── Atomic structure and compositional disorder ───────────────────────────────
+system:
+  _target_: MC.state.configuration.FixedCompositionConfiguration
+
+  parent_structure_path: ${project_root}/mc_structures/supercells/Fe_bcc_333_interstitial.vasp
+
+  # Each key is a parent element in the pristine structure.
+  # real: True if the element is present for structural relaxation and GNN evaluation.
+  disorder_cfg:
+    Fe:
+      species:       [Fe, Co]
+      concentration: [0.5, 0.5]
+      real:          [True, True]
+    Og:
+      species:       [Og, C]
+#      concentration: [0.9, 0.1]
+      count:         [null, 3]
+      real:          [False, True]
+
+  # Initial magnetic moment magnitude per element.
+  # Elements absent from this dict default to 0.
+  MAGMOM_dict:
+    Fe: 3.0
+    Co: 2.0
+    C:  0.0
+
+  # Sign convention for initial moments: "random" (±1 per site) or "FM" (all +1).
+  MAGMOM_init_mode: random
+
+  # chemical_potential_dict is only required for VariableCompositionConfiguration.
+
+# ── Calculator ────────────────────────────────────────────────────────────────
+calculator:
+  # --- GNN model ---
+  GNN:
+    model_path:      ${project_root}/results_and_figs/GNN/models
+    model_ckpt_name: Transformer_initialMAGMOM_trial_27
+
+  # --- Graph construction ---
+  graph:
+    backend: ase
+
+    node_features:
+      elemental_feature_type: one_hot
+      MAGMOM_features: True
+      PH_features: False
+
+    edge_features:
+      r_cutoff: 4.0
+      num_radial_basis: 128
+
+  # --- Normalization metadata ---
+  dataset_metadata:
+    dataset_path: ${project_root}/data/GNN/
+    signature_hash: c3339de7
+
+  # --- Relaxation (only used when relax: true) ---
+  MLIP:
+    mlip_model_path: ${project_root}/results_and_figs/MLIP
+    mlip_ckpt_name:  CHGNET_fs
+
+  # --- Structural distortion ---
+  structural_distortion:
+    mode: relaxation  # null (GNN-only), relaxation, or md
+
+    warm_start: true # reuse the last accepted relaxed positions as the starting geometry
+
+    relaxation:
+      fmax:       0.1    # force convergence criterion in eV/Å
+      max_steps:  10     # maximum optimiser steps per relaxation
+      relax_cell: true   # also relax unit-cell vectors (ExpCellFilter)
+
+    md:
+      relax_cell:    false  # false → NVT (Langevin); true → NPT (MTK)
+      timestep:      2.0    # fs
+      burn_in_steps: 100    # equilibration steps (discarded)
+      n_md_steps:    200    # production steps (the total number of steps is n_md_steps + burn_in_steps)
+      n_snapshots:   10     # snapshots drawn from production trajectory
+      # Safety thresholds: set to null to disable
+      force_threshold:  50.0   # eV/Å — reject proposal if any force exceeds this
+      dist_threshold:   1.0    # Å    — reject proposal if any pair closer than this
+      # NVT parameters (only used when relax_cell: false)
+      friction:         0.01    # fs^-1, Langevin friction coefficient
+      # NPT parameters (only used when relax_cell: true)
+      pressure:         0.0     # GPa, external pressure; 1 atm = 1.01325E-4 GPa
+      taut:             100.0   # fs, MTK thermostat coupling time (tdamp)
+      taup:             1000.0  # fs, MTK barostat coupling time (pdamp)
+      tchain:           3       # number of thermostat Nosé-Hoover chain links
+      pchain:           3       # number of barostat Nosé-Hoover chain links
+      tloop:            1       # thermostat sub-steps per MD step
+      ploop:            1       # barostat sub-steps per MD step
+
+# ── MC moves ──────────────────────────────────────────────────────────────────
+moves:
+  _target_: MC.state.moves.FixedCompositionMoves
+
+  disorder_cfg: ${mc.system.disorder_cfg}
+
+  fix_elem:   false
+  fix_magmom: false
+
+# ── Metropolis engine ─────────────────────────────────────────────────────────
+mc:
+  temperature:
+    Tmin: 100
+    Tmax: 1000
+    dT:   50       # with dT the schedule runs Tmax → Tmin (cooling)
+    spacing: linear
+
+  steps_per_T:      10
+
+  # Store every nth sample summary (1 = store every step).
+  # By default, energies and observables are stored for every step.
+  thin_ratio:       0.02
+
+  # Log a status line every N actual MC steps.
+  log_every_n_steps: 1
+
+  reject_nan:    true
+  store_samples: true
+
+  save_results_path: ${project_root}/results_and_figs/MC/${mc.name}/results

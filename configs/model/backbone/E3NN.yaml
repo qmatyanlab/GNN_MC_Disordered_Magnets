@@ -1,0 +1,17 @@
+_target_: model.GNN.backbones.E3NN.E3NNBackbone
+name: E3NN
+
+num_hidden_layers: 2
+num_hidden_channels: 128
+num_MLP_layers: 2
+r_cutoff: ${dataset.graph.edge_features.r_cutoff}
+num_radial_basis: ${dataset.graph.edge_features.num_radial_basis}
+act_fn: 'relu'
+
+lmax: 2
+multiplicity: 1
+radial_mlp_layers: 2
+radial_mlp_hidden_dim: 128
+
+use_initial_MAGMOM: True
+use_PH_features: True

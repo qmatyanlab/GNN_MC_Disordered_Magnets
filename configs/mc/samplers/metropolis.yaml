@@ -1,0 +1,21 @@
+name: metropolis
+
+temperature:
+  mode: grid
+  Tmin: 300.0
+  Tmax: 1500.0
+  num: 25
+  spacing: linear
+  explicit: [300, 400]
+
+steps:
+  steps_per_temperature: 10000
+  burn_in: 5000
+  thin: 5
+
+acceptance:
+  criterion: metropolis
+
+metropolis:
+  target_acceptance: null
+  adaptive_temperature: false

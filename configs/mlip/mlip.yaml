@@ -1,0 +1,69 @@
+name: CHGNET
+seed: 42
+
+dataset:
+  root: ${project_root}/data/MLIP/FeCoC_spin_polarized_relaxation_structuredata.pkl
+
+  train_ratio: 0.8
+  val_ratio: 0.1
+
+  batch_size: 16
+
+train:
+  targets: efs
+
+  energy_loss_ratio: 0.0
+  force_loss_ratio: 1.0
+  stress_loss_ratio: 1.0
+
+  train_ratio: 0.8
+  val_ratio: 0.1
+
+  epochs: 100
+
+  optimizer: AdamW
+  scheduler: CosineAnnealingLR
+  criterion: MSE
+
+train_optuna:
+  n_trials: 50
+
+  search_space:
+    lr:
+      type: categorical
+      values: [1E-5, 5E-5, 1E-4, 5E-4, 1E-3, 5E-3, 1E-2, 5E-2]
+
+    batch_size:
+      type: categorical
+      values: [2, 4, 8, 16, 32]
+
+    trainable_modules:
+      type: categorical
+      values:
+        - [ "site_wise" ]
+        - [ "mlp.layers" ]
+        - [ "mlp.layers", "site_wise" ]
+        - [ "mlp.layers", "readout_norm", "site_wise" ]
+        - [
+          "mlp.layers",
+          "readout_norm",
+          "site_wise",
+          "atom_conv_layers.3",
+          "bond_conv_layers.2",
+          "angle_layers.2",
+        ]
+        - [
+          "mlp.layers",
+          "readout_norm",
+          "site_wise",
+          "atom_conv_layers.2",
+          "atom_conv_layers.3",
+          "bond_conv_layers.1",
+          "bond_conv_layers.2",
+          "angle_layers.1",
+          "angle_layers.2",
+        ]
+
+
+
+

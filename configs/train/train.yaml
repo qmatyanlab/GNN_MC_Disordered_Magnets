@@ -1,0 +1,48 @@
+debug_mode: false
+
+seed: 42
+use_gpu: False
+num_gpus: 1
+strategy: ddp
+
+loss_fn: mse
+patience: 100000
+
+optimizer:
+  _target_: torch.optim.Adam
+  lr: 0.1
+  weight_decay: 0
+
+#lr_scheduler:
+#  _target_: torch.optim.lr_scheduler.CosineAnnealingWarmRestarts
+#  T_0: 20
+#  T_mult: 1
+#  eta_min: 0
+
+pl_trainer:
+  max_epochs: 250
+  accumulate_grad_batches: 1
+#  num_sanity_val_steps: 2
+  check_val_every_n_epoch: 1
+#  gradient_clip_val: 0.5
+#  gradient_clip_algorithm: value
+  profiler: simple
+
+weights_adapter:
+    method: static     # static | dwa | uncertainty
+
+    static:
+      weights: [1.0, 1.0]
+
+    dwa:
+      temperature: 2.0
+
+    uncertainty:
+      init_log_var: 0.0
+
+optuna:
+  num_trials: 4
+  direction: minimize
+
+defaults:
+  - optuna: E3NN

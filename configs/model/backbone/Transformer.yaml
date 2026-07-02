@@ -1,0 +1,16 @@
+_target_: model.GNN.backbones.Transformer.TransformerBackbone
+name: Transformer
+
+num_hidden_layers: 6
+num_hidden_channels: 128
+num_heads: 8
+num_MLP_layers: 4
+num_radial_basis: 128
+act_fn: 'silu'
+
+use_initial_MAGMOM: True
+use_PH_features: True
+use_frac_coords: True
+
+use_node_features_in_edge: True
+use_displacement_vector: True

@@ -1,0 +1,14 @@
+level: debug
+
+wandb:
+  project: your_project_name
+#  name: ${now:%Y-%m-%d}_${now:%H-%M-%S}_testE3NN
+  name: test
+  entity: your_wandb_username
+  log_model: false
+  save_code: false
+  mode: online
+
+wandb_watch:
+  log: all
+  log_freq: 100
